@@ -18,17 +18,10 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      },
-      "package": "com.eurmurat.speedyli"
+      }
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    },
-    "extra": {
-      "eas": {
-        "projectId": "1512fe52-5322-4840-9c07-0b4d391a9a9b"
-      }
-    },
-    "owner": "cemal"
+    }
   }
 }

@@ -17,15 +17,8 @@ const AccountStack = () => {
       screenOptions={{
         header: (props) => <Header {...props} />,
       }}
+      initialRouteName="LoginScreen"
     >
-      <Stack.Screen
-        name="LoginScreen"
-        component={LoginScreen}
-        options={{
-          title: "Login",
-        }}
-      />
-
       <Stack.Screen
         name="ProfileScreen"
         component={ProfileScreen}
@@ -52,14 +45,6 @@ const AccountStack = () => {
         component={ReservationDetailsScreen}
         options={{
           title: "Reservation Details",
-        }}
-      />
-
-      <Stack.Screen
-        name="RegisterScreen"
-        component={RegisterScreen}
-        options={{
-          title: "Register",
         }}
       />
     </Stack.Navigator>

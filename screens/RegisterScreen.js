@@ -1,15 +1,27 @@
-import { StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 import React, { useState } from "react";
 import { Button, HelperText, TextInput } from "react-native-paper";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import colors from "../constants/colors";
 import { useNavigation } from "@react-navigation/native";
+import { userApi } from "../api/userApi";
+import Toast from "react-native-toast-message";
+import AppContext from "../store/AppContext";
+import { MaskedTextInput } from "react-native-mask-text";
 
 const RegisterScreen = () => {
+  const navigation = useNavigation();
+
   const validationSchema = Yup.object().shape({
-    email: Yup.string().required().email().label("Email"),
-    password: Yup.string().required().min(4).label("Password"),
+    email: Yup.string()
+      .required("Email Alanını Doldurunuz")
+      .email("Lütfen Geçerli Bir Email Adresi Giriniz")
+      .label("Email"),
+    password: Yup.string()
+      .required()
+      .min(4, "Sifrenin guvenli olması icin En Az 4 Karakter Olmalıdır")
+      .label("Password"),
     confirmPassword: Yup.string()
       .required()
       .min(4)
@@ -37,14 +49,42 @@ const RegisterScreen = () => {
 
   const formik = useFormik({
     initialValues,
-    onSubmit: (values) => {
+    onSubmit: async (values) => {
       console.log(values);
+
+      userApi
+        .registerUser({
+          firstName: values.firstName,
+          lastName: values.lastName,
+          email: values.email,
+          password: values.password,
+          phoneNumber: values.phone,
+          address: values.address,
+          zipCode: values.zipCode,
+        })
+        .then((response) => {
+          if (response === true) {
+            Toast.show({
+              type: "success",
+              text1: "Register Successful",
+            });
+            navigation.navigate("LoginScreen");
+          } else {
+            Toast.show({
+              type: "error",
+              text1: response,
+            });
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+        });
     },
     validationSchema,
   });
 
   return (
-    <View style={{ padding: 15, paddingTop: 40 }}>
+    <ScrollView style={styles.container}>
       <TextInput
         placeholder="First Name"
         value={formik.values.firstName}
@@ -81,6 +121,13 @@ const RegisterScreen = () => {
         style={{ padding: 5 }}
         activeUnderlineColor={colors.color1}
         underlineColor="gray"
+        render={(props) => (
+          <MaskedTextInput
+            {...props}
+            value={formik.values.phone}
+            mask="(999) 999-9999"
+          />
+        )}
       />
       <HelperText type="error" visible={formik.errors.phone}>
         {formik.errors.phone}
@@ -156,10 +203,11 @@ const RegisterScreen = () => {
         mode="contained"
         style={styles.button}
         onPress={formik.handleSubmit}
+        disabled={!formik.isValid}
       >
         Register
       </Button>
-    </View>
+    </ScrollView>
   );
 };
 
@@ -168,6 +216,11 @@ export default RegisterScreen;
 const styles = StyleSheet.create({
   button: {
     marginTop: 20,
+    marginBottom: 40,
     backgroundColor: colors.color1,
+  },
+  container: {
+    flex: 1,
+    padding: 20,
   },
 });

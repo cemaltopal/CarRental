@@ -11,22 +11,13 @@ import Icon from "@expo/vector-icons/Feather";
 import { PaperProvider } from "react-native-paper";
 import AppContext from "./store/AppContext";
 import { useState } from "react";
-import Toast from "react-native-toast-message";
 
 export default function App() {
   const Tab = createBottomTabNavigator();
   const [searchActive, setSearchActive] = useState(false);
-  const [userInformation, setUserInformation] = useState({});
 
   return (
-    <AppContext.Provider
-      value={{
-        searchActive,
-        setSearchActive,
-        userInformation,
-        setUserInformation,
-      }}
-    >
+    <AppContext.Provider value={{ searchActive, setSearchActive }}>
       <PaperProvider>
         <NavigationContainer>
           <Tab.Navigator
@@ -79,7 +70,6 @@ export default function App() {
               }}
             />
           </Tab.Navigator>
-          <Toast />
         </NavigationContainer>
       </PaperProvider>
     </AppContext.Provider>

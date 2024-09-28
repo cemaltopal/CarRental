@@ -1,18 +1,11 @@
-import {
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-  ScrollView,
-} from "react-native";
-import React, { useState, useCallback } from "react";
-import { Card, Title, Paragraph } from "react-native-paper";
-import colors from "../constants/colors";
-import Icon from "@expo/vector-icons/MaterialCommunityIcons";
-import sizes from "../constants/sizes";
-import CarReservation from "../components/home/CarReservation";
+import { StyleSheet, ScrollView } from "react-native";
+import React, { useState } from "react";
+import CarReservationForm from "../components/home/CarReservation";
+import CarDetailsCard from "../components/common/CarDetails";
+import { createContext } from "react";
+import { PaperProvider } from "react-native-paper";
 
-const CarDetailsScreen = ({ route }) => {
+const CarReserveAndDetailScreen = ({ route }) => {
   const data = route.params.data;
   const {
     id,
@@ -31,101 +24,26 @@ const CarDetailsScreen = ({ route }) => {
 
   console.log(airConditioning);
 
+  // {
+  //   "message": "string",
+  //   "sucess": true
+  // }
+
   return (
-    <ScrollView style={styles.container}>
-      <Card style={styles.card}>
-        <Card.Cover
-          source={{
-            uri: image[0],
-          }}
-        />
-        <Card.Content style={styles.cardContent}>
-          <Title style={styles.title}>{model}</Title>
+    <PaperProvider>
+      <ScrollView style={styles.container}>
+        <CarDetailsCard details={data} />
 
-          <Text>
-            <Icon name="car-door" size={24} color={colors.color1} /> {doors}{" "}
-            doors | <Icon name="car-seat" size={24} color={colors.color1} />{" "}
-            {seats} seats
-          </Text>
-          <TouchableOpacity style={styles.button}>
-            <Text style={styles.buttonText}>${pricePerHour} / hour</Text>
-          </TouchableOpacity>
-
-          <View style={styles.icons}>
-            <View>
-              <Icon
-                name="car-shift-pattern"
-                size={sizes.carDetailIconSize}
-                color={colors.color1}
-              />
-              <Text>{transmission}</Text>
-            </View>
-
-            {airConditioning && (
-              <View>
-                <Icon
-                  name="snowflake"
-                  size={sizes.carDetailIconSize}
-                  color={colors.color1}
-                />
-                <Text>Air Cond</Text>
-              </View>
-            )}
-
-            <View>
-              <Icon
-                name="gas-station"
-                size={sizes.carDetailIconSize}
-                color={colors.color1}
-              />
-              <Text>{fuelType}</Text>
-            </View>
-          </View>
-        </Card.Content>
-      </Card>
-
-      <CarReservation />
-    </ScrollView>
+        <CarReservationForm data={data} />
+      </ScrollView>
+    </PaperProvider>
   );
 };
 
-export default CarDetailsScreen;
+export default CarReserveAndDetailScreen;
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  cardContent: {
-    alignItems: "center",
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: "bold",
-  },
-  card: {
-    marginTop: 20,
-    paddingBottom: 20,
-  },
-  button: {
-    marginTop: 25,
-    width: "100%",
-    backgroundColor: colors.color4,
-    padding: 10,
-    borderRadius: 30,
-  },
-  buttonText: {
-    color: "black",
-    textAlign: "center",
-    fontSize: 20,
-  },
-  icons: {
-    marginTop: 25,
-    width: "100%",
-    flexDirection: "row",
-    justifyContent: "space-around",
-  },
-  dateTimeButton: {
-    borderRadius: 5,
-    padding: 10,
   },
 });

@@ -5,6 +5,7 @@ const sizes = {
   paragraphFontSize: 6,
   titleFontSize: 25,
   carDetailIconSize: 50,
+  containerPadding: 10,
 };
 
 export default sizes;

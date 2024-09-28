@@ -1,17 +1,37 @@
 import { StyleSheet, Text, View } from "react-native";
 import React, { useCallback, useState } from "react";
 import { DatePickerModal } from "react-native-paper-dates";
-import { Button, TextInput, HelperText } from "react-native-paper";
+import {
+  Button,
+  TextInput,
+  HelperText,
+  Modal,
+  Portal,
+  Title,
+} from "react-native-paper";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { registerTranslation, enGB } from "react-native-paper-dates";
 import colors from "../../constants/colors";
 import { useFormik } from "formik";
+import { useNavigation } from "@react-navigation/native";
+import { carApi } from "../../api/carApi";
 
 import * as Yup from "yup";
 
 registerTranslation("en", enGB);
 
-const CarReservation = () => {
+const CarReservationForm = ({ data }) => {
+  // Dogrulama fonksiyonları ve degiskenleri
+  const [pickupLocation, setPickupLocation] = useState("");
+  const [dropoffLocation, setDropoffLocation] = useState("");
+  const [reservationSuccessState, setReservationSuccessState] = useState({
+    message: "Your Reservation Request Is Available",
+    sucess: true,
+  });
+  const navigation = useNavigation();
+  const [orderSummary, setOrderSummary] = useState({});
+
+  //Formik States
   const validationSchema = Yup.object().shape({
     pickupLocation: Yup.string()
       .max(255)
@@ -30,11 +50,38 @@ const CarReservation = () => {
       pickupDate: "",
       dropoffDate: "",
     },
-    onSubmit: (values) => {
+    //reserve butonuna basınca bu calısıyor
+    onSubmit: async (values) => {
+      //Reservation sorgusu gonderilecek , beraberinde car id, picup location, picupdate, dropoff location ve date
+      //gonderilecek
+      console.log(data.id);
       console.log(values);
+
+      // carApi.isCarAvailableForReservation(
+      //   data.id,
+      //   "2024-09-26T19:20:04.745Z",
+      //   "2024-09-26T19:20:04.745Z"
+      // )
+      carApi
+        .addCarReservation(
+          data.id,
+          values.pickupDate,
+          values.dropoffDate,
+          values.pickupLocation,
+          values.dropoffLocation
+        )
+        .then((response) => {
+          console.log(response);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+      setOrderSummary({ ...data, ...formik.values });
+      showModal();
     },
     validationSchema,
   });
+  //End Formik States DOgrulama fonksiyonları sonu
 
   //Date Picker States
   const [range, setRange] = useState({
@@ -59,11 +106,57 @@ const CarReservation = () => {
   );
   // End Date Picker States
 
-  const [pickupLocation, setPickupLocation] = useState("");
-  const [dropoffLocation, setDropoffLocation] = useState("");
+  /* MODAL DEGISKENLERI */
+  const [visible, setVisible] = React.useState(false);
 
+  const showModal = () => setVisible(true);
+  const hideModal = () => setVisible(false);
+  const containerStyle = { backgroundColor: "white", padding: 20 };
+  /* MODAL DEGISKENLERI SON */
   return (
     <View style={{ margin: 20 }}>
+      <Portal>
+        <Modal
+          visible={visible}
+          onDismiss={hideModal}
+          contentContainerStyle={styles.modalContainer}
+        >
+          <Title
+            style={reservationSuccessState.sucess ? styles.sucess : styles.fail}
+          >
+            Reservation Request:{" "}
+            {reservationSuccessState.sucess ? "Successful" : "Not Available"}
+          </Title>
+
+          <Text>{reservationSuccessState.message}</Text>
+
+          {!reservationSuccessState.sucess ? (
+            <Button
+              onPress={hideModal}
+              mode="contained"
+              style={{ ...styles.button, marginTop: 20 }}
+            >
+              Ok
+            </Button>
+          ) : (
+            // Basarılı olma durumunda siparis detaları navigasyonla gonderiliyor
+            <Button
+              onPress={() =>
+                navigation.navigate("PaymentScreen", {
+                  ...orderSummary,
+                  pickupDate: formik.values.pickupDate.toISOString(),
+                  dropoffDate: formik.values.dropoffDate.toISOString(),
+                })
+              }
+              mode="contained"
+              style={{ ...styles.button, marginTop: 20 }}
+            >
+              MAKE PAYMENT
+            </Button>
+          )}
+        </Modal>
+      </Portal>
+
       <TextInput
         placeholder="Pick up location"
         value={formik.values.pickupLocation}
@@ -132,7 +225,7 @@ const CarReservation = () => {
   );
 };
 
-export default CarReservation;
+export default CarReservationForm;
 
 const styles = StyleSheet.create({
   button: {
@@ -140,5 +233,19 @@ const styles = StyleSheet.create({
     backgroundColor: colors.color4,
     padding: 5,
     borderRadius: 30,
+  },
+  modalContainer: {
+    alignItems: "center",
+    backgroundColor: "white",
+    padding: 20,
+    margin: 20,
+    height: 300,
+    borderRadius: 10,
+  },
+  sucess: {
+    color: "green",
+  },
+  fail: {
+    color: "red",
   },
 });
